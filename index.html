@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="css/reveal.css">
+  <link rel="stylesheet" href="css/night.css">
+  <link rel="stylesheet" href="plugin/highlight/style/monokai-sublime.css">
+  <meta charset="utf-8"/>
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="tmp">
+TMP NOTES, DELETE THIS SLIDE
+<small>
+<pre>
+                                                                                                                              x
+CBRAIN_SKIP_VALIDATIONS
+CBRAIN_DEBUG_SQL_SOURCE_LINES
+CBRAIN_DEBUG_TRACES
+CBRAIN_BOUTIQUES_DUMPDIR CBRAIN_BOUTIQUES_DUMPTASK
+
+migrations
+
+rails side:
+  lib
+  cookies + sessions
+
+style
+  rdoc
+  github info
+
+  console on other bourreaux
+
+log examination
+  portal
+    timestamps
+  bourreau
+
+cbrain helpers
+  puts_color
+  puts_timer
+
+generating rdoc
+
+users:
+  normal vs admin
+  use several browsers or private mode of browser
+
+github fork and PR protocol
+
+multi sessions in browser
+
+inspecting processes
+
+running tests
+  writing tests
+  API tests
+
+creating a task
+creating a model
+creating a viewer
+</pre>
+</small>
+</section>
+
+
+<section>
+
+  <section id="title">
+    <img src="images/cbrain-large_white_alpha.png" class="cbblue">
+    <h1>Developer Workshop</h1>
+    Pierre Rioux
+    <br>
+    <span>March-April 2019</span>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="before1">
+    <h2>Prerequisites 1</h2>
+    Before we start, we should all have an operational<br>
+    <strong>CBRAIN development installation</strong>.
+    <p>
+    It should contain at least:
+    <p>
+    <ul>
+      <li>A functionning <strong>development</strong>, <strong>production</strong> and <strong>test</strong> environment</li>
+      <li>A couple of Bourreaux: one local, one on ace-vh-2</li>
+      <li>A few DataProviders: one browsable, one EnCB, one remote...</li>
+      <li>This CBRAIN plugins: <em>cbrain-plugins-neuro</em></li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="before2">
+    <h2>Prerequisites 2</h2>
+    For the training session and demos, I strongly suggest you have:
+    <p>
+    <ul>
+      <li>One browser window open on one of your screens</li>
+      <li><strong>Two</strong> terminal windows (or tabs) open on the other:
+        <ol><li>One with a <strong>small</strong> font for the server logs</li>
+            <li>One with a <strong>comfortable</strong> font for shell work</li></ol>
+      </li>
+    </ul>
+  </section>
+
+</section>
+
+<!-- ############################## -->
+<!-- ############################## -->
+<!-- ############################## -->
+
+<section>
+
+  <section id="fs">
+    <h2>The files</h2>
+    Two main subdirectories: <em>BrainPortal/</em> and <em>Bourreau/</em>.
+    <p>
+    Each is a <strong>Rails</strong> application.
+    <p>
+    <em>Bourreau/...</em> is mostly symbolic links.
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>cd cbrain</li>
+      <li>have a look at the files with <em>ls</em></li>
+      <li>check links in Bourreau/app/models/</li>
+      <li>ask me about anything weird you see</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="environments">
+    <h2>Rails Environments</h2>
+    Normally, three of those: <em>development</em>, <em>production</em> and <em>test</em>.
+    <p>
+    Each can potentially connect to a <strong>distinct</strong> database.
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>cd BrainPortal/db</li>
+      <li>cat database.yml</li>
+      <li>cd BrainPortal/config</li>
+      <li>have a look at files there</li>
+    </ul>
+    <p>
+    Recommended:
+    <ul>
+      <li><em>development</em> and <em>production</em> <strong>share the same DB</strong></li>
+      <li><em>test</em> has <strong>its own DB</strong></li>
+   </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="railscore">
+    <h2>Rails Core</h2>
+    Located under <em>app/</em>
+    <p>
+    Rails is a <strong>MVP</strong> framework, so you'll find<br>
+    <em>models/</em>, <em>views/</em> and <em>controllers/</em>.
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>cd BrainPortal/app</li>
+      <li>examine the models, views or controllers</li>
+      <li><em>helpers/</em>: view helpers</li>
+      <li><em>assets/</em>: static web assets (image, stylesheets etc)</li>
+      <li><em>mailers/</em>: 'models' for email messages</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="consoleboot">
+    <h2>Console Boot</h2>
+    Similar to the web server's boot process
+<pre>C&gt; CBRAIN System Checks starting, 2019-03-29 19:17:24 -0400
+C&gt; Ruby 2.4.1 on Rails 5.0.6, environment is set to 'development'
+C&gt; CBRAIN instance is named 'PID-51004'
+C&gt; Hostname is 'bianca.cbrain.mcgill.ca'
+C&gt; CBRAIN identified boot mode: console
+<strong>(more messages...)</strong>
+C&gt; CBRAIN BrainPortal validation completed, 2019-03-29 19:17:28 -0400
+Loading development environment (Rails 5.0.6)
+C&gt; CBRAIN Rails Console Initialization starting
+Current user is now: admin
+Current project is now: (nil)
+
+Welcome the the CBRAIN Rails Console
+To get a summary of the extra CBRAIN features, type 'cbhelp'.
+
+Bianca :001 &gt; <span class="cursor">&#9608;</span>
+</pre>
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>cd BrainPortal</li>
+      <li>rails console</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="boot1">
+    <h2>Boot Messages 1</h2>
+<pre>C&gt; CBRAIN System Checks starting, 2019-03-29 19:28:04 -0400
+C&gt; Ruby 2.4.1 on Rails 5.0.6, environment is set to 'development'
+C&gt; CBRAIN instance is named 'PID-51216'
+C&gt; Hostname is 'bianca.cbrain.mcgill.ca'
+C&gt; CBRAIN identified boot mode: console
+C&gt;      - Note:  You can skip all CBRAIN validations by temporarily setting the
+C&gt;               environment variable 'CBRAIN_SKIP_VALIDATIONS' to '1'.
+C&gt; Ensuring that this CBRAIN app is registered in the DB...
+C&gt;      - This CBRAIN app is named 'Bianca' and is registered.
+C&gt; Ensuring that the Sys::ProcTable gem is operational...
+C&gt;      - All good. Found process name: ruby
+C&gt; Setting time zone for application...
+C&gt;      - Time zone set to 'Eastern Time (US &amp; Canada)'.
+</pre>
+    <ul>
+      <li>Notice the version numbers at the top</li>
+      <li>The <strong>instance name</strong> is no longer much used</li>
+      <li>The <strong>app name</strong> is registered in <em>config/config_portal.rb</em></li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="boot2">
+    <h2>Boot Messages 2</h2>
+<pre>C&gt; Making sure we can track file revision numbers.
+C&gt;      - Revisions are fetched using: git
+C&gt; Cleaning up old SyncStatus objects...
+C&gt;      - No SyncStatus objects are associated with obsolete resources.
+C&gt;      - No SyncStatus objects are associated with obsolete files.
+C&gt; Checking to see if Data Provider cache is valid...
+C&gt; Checking to see if Data Provider cache needs cleaning up...
+C&gt;      - Wiping old files in Data Provider cache (in background).
+C&gt; Current application tag or revision: 5.1.1-4
+C&gt; Current Git branch: master
+</pre>
+    <ul>
+      <li>Two ways to track revision numbers: <em>git</em> or a <strong>flatfile csv</strong></li>
+      <li>Consistency checks</li>
+      <li>The DP cache wipe of OLD FILE are only for file that no longer even exist</li>
+      <li>GIT info for making sure Rails boot with the proper code</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="boot3">
+    <h2>Boot Messages 3</h2>
+<pre>C&gt; CbrainTask::BidsAppHandler: Integrated CbrainTask::BIDSAppFMRIprep
+C&gt; CbrainTask::BidsAppHandler: Integrated CbrainTask::BIDSAppFreesurferReconAll
+C&gt; CbrainTask::BidsAppHandler: Integrated CbrainTask::BIDSExample2
+C&gt; CbrainTask::BidsAppHandler: Integrated CbrainTask::ExampleGoodbidsapp
+<strong>...</strong>
+C&gt; Integrated CbrainTask::BEst from descriptor 'best_toolbox.json'
+C&gt; Integrated CbrainTask::NiakFmriPreprocess from descriptor 'FmriPreprocess.json'
+C&gt; Integrated CbrainTask::FslAnat from descriptor 'fsl_anat.json'
+C&gt; Integrated CbrainTask::FslBet from descriptor 'fsl_bet.json'
+C&gt; Integrated CbrainTask::FslEddyCudaForHcp from descriptor 'fsl_eddy_hcp_cuda.json'
+C&gt; Integrated CbrainTask::FslFast from descriptor 'fsl_fast.json'
+<strong>...</strong>
+</pre>
+    <ul>
+      <li>One line per Boutiques descriptor integrated</li>
+      <li>Two <strong>integration modes</strong> however:
+        <ul>
+          <li>Descriptors integrated by the standard task <em>BidsAppHandler</em></li>
+          <li>Descriptors integrated by the CBRAIN integrator</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="boot4">
+    <h2>Boot Messages 4</h2>
+<pre>C&gt; Checking for pending migrations...
+C&gt; Checking if the BrainPortal database needs a sanity check...
+C&gt; Making sure we have a SSH agent to provide our credentials...
+C&gt;      - Found existing agent: PID=13587 SOCK=/Users/prioux/CBRAIN/BrainPortal/tmp/
+sockets/ssh-agent.portal.sock
+C&gt; Making sure we have a CBRAIN key for the agent...
+C&gt;      - Added identity to agent from file: '/Users/prioux/.ssh/id_cbrain_portal'.
+C&gt; Starting automatic Agent Locker in background...
+C&gt;      - Locker already being created. (/Users/prioux/CBRAIN/BrainPortal/tmp/AgentLocker.lock)
+C&gt; CBRAIN BrainPortal validation completed, 2019-03-29 19:28:09 -0400
+</pre>
+    <ul>
+      <li>Sanity checks are run ONLY once, each time <em>portal_sanity_checks.rb</em> is changed</li>
+      <li>The SSH agent is started once and is persistent across CBRAIN reboots</li>
+      <li>Same thing with the SshAgentLocker</li>
+      <li>State information in kept under <em>BrainPortal/tmp/{pids|sockets}</em></li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="initalizers">
+    <h2>Initializers</h2>
+    Each initializer <em>.rb</em> file is sourced in <strong>alphabetical order</strong>.
+    <p>
+    Some files are provided by Rails, some by <em>CBRAIN</em>.
+    <p>
+<pre>
+<em>added_core_extensions/</em>                  <em>config_portal.rb.TEMPLATE</em>               new_framework_defaults.rb
+application_controller_renderer.rb      cookies_serializer.rb                   rack_config.rb
+assets.rb                               filter_parameter_logging.rb             session_store.rb
+backtrace_silencers.rb                  inflections.rb                          <em>validation_portal.rb</em>
+<em>cbrain.rb</em>                               <em>initialize_console.rb</em>                   wrap_parameters.rb
+<em>cbrain_deprecation_tmp.rb</em>               <em>listen_temp_monkeypatch.rb</em>
+<em>config_portal.rb</em>                        mime_types.rb
+</pre>
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>cd BrainPortal/config/initializers</li>
+      <li>ls</li>
+      <li>Examine <em>session_store.rb</em> or <em>cbrain.rb</em></li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="envdev1">
+    <h2>Rails 'development' environment</h2>
+    <ul>
+      <li>This is what you mostly should use on your desktop</li>
+      <li>It's meant to provide near-live feedback</li>
+      <li>Code files are monitored and reloaded between each request</li>
+      <li>Applies to everything in <em>app/</em></li>
+      <li>Crashes are handled with <strong>stack traces in browser</strong></li>
+      <li>Emails are not really sent</li>
+      <li>Slower than 'production' environment</li>
+    </ul>
+  </section>
+
+  <section id="envdev2">
+    <h2>Rails 'development' environment</h2>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>cd to <em>BrainPortal/app/views/users</em></li>
+      <li>add correct HTML code to <em>show.html</em></li>
+      <li>browse to <strong>My Account</strong></li>
+      <li>add incorrect code in <em>BrainPortal/app/controllers/users_controller.rb</em> in method <em>def show</em></li>
+      <li>refresh page</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="envprod1">
+    <h2>Rails 'production' environment</h2>
+    <ul>
+      <li>Switch to this to enable production-specific code</li>
+      <li>Code changed while running won't have any effect</li>
+      <li>Crashes are handled with <strong>production-specific handlers</strong></li>
+      <li>Emails are sent if possible!</li>
+      <li>Faster execution than 'development' environment</li>
+      <li>Logs are much more splified</li>
+      <li>Many preparation steps need to be run:
+        <ol>
+          <li>Need secret token for encrypting the cookies</li>
+          <li>Assets must be precompiled</li>
+          <li>Static assets server MIGHT have to be enabled!</li>
+        </ol>
+      </li>
+    </ul>
+  </section>
+
+  <section id="envprod2">
+    <h2>Rails 'production' environment</h2>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>make sure your dev server is down</li>
+      <li>cd to <em>BrainPortal</em></li>
+      <li>start the server in production mode</li>
+      <li>access <strong>My Account</strong></li>
+      <li>Internal error? Then set <em>config/secrets.yml</em> or env <em>SECRET_KEY_BASE</em></li>
+      <li>Assets missing? Run with env <em>RAILS_SERVE_STATIC_FILES</em></li>
+      <li>Assets incomplete? Run <em>rake assets:precompile</em></li>
+      <li>Change a stylesheet rule, see how it doesn't show up even after a restart</li>
+      <li>Examine the logs too, see how cleaner they are?</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="puma1">
+    <h2>Starting the server</h2>
+    <ul>
+      <li>We use <em>puma</em>, a Ruby server with compiled C code</li>
+      <li>You need to specify the <strong>rails environment</strong> and the <strong>local port number</strong></li>
+      <li>Defaults are, respectively, <em>development</em> and <em>3000</em></li>
+      <li>The server can be started in two modes:
+        <ol>
+          <li>Using the <em>rails</em> wrapper</li>
+          <li>Directly invoking <em>puma</em></li>
+        </ol>
+      </li>
+    </ul>
+  </section>
+
+  <section id="puma2">
+    <h2>Standard server launch</h2>
+    Logs a sent to screen, and also captured in files:
+    <ul class="dothis"><legend>With rails</legend>
+      <li>cd BrainPortal</li>
+      <li>rails server puma -e development -p 3000</li>
+    </ul>
+    <p>
+    <h2>Alternative server launch</h2>
+    No Rails logs, control of parallelism:
+    <ul class="dothis"><legend>Directly puma</legend>
+      <li>cd BrainPortal</li>
+      <li>puma -e development -p 3000</li>
+      <li>puma -h</li>
+    </ul>
+    <p>
+    Both methods support <em>-d</em> to demonize.
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="console1">
+    <h2>The Rails Console 1</h2>
+    Your first stop for testing small pieces of Ruby code,<br>
+    and examining your system.
+    <p>
+    <ul>
+      <li>Access to all Rails subsystems</li>
+      <li>Extraordinary CBRAIN extensions (type <em>cbhelp</em>)</li>
+    </ul>
+    <ul class="dothis"><legend>Starting it</legend>
+      <li>rails console development</li>
+      <li>rails console production</li>
+      <li>rails console test # might not work</li>
+    </ul>
+  </section>
+
+  <section id="console2">
+    <h2>The Rails Console 2</h2>
+    <ul class="dothis"><legend>no_log/do_log</legend>
+      <li>do_log</li>
+      <li>u = User.first</li>
+      <li>no_log</li>
+      <li>u = User.first</li>
+      <li>do_log { Tool.all }</li>
+    </ul>
+    <ul class="dothis"><legend>current user/group</legend>
+      <li>cu</li>
+      <li>current_user</li>
+      <li>current_project</li>
+      <li>cu User.last</li>
+      <li>cp WorkGroup.last</li>
+    </ul>
+  </section>
+
+  <section id="console3">
+    <h2>The Rails Console 3</h2>
+    <em>fff</em> is the <strong>friendly fast finder</strong>.
+    <p>
+    It searches in many categories: files,  tasks, users, groups, tools, etc.
+    <p>
+    If it finds a single record in a category, it sets a variable with a single
+    letter name (e.g. <em>@f</em> for a file, <em>@u</em> for the user).
+    <p>
+    If it finds several records, its sets an array of results to a variable
+    with two letters (e.g. <em>@ff</em> for many files, <em>@uu</em> for many user).
+    <p>
+    <ul class="dothis"><legend>find <strong>anything!</strong></legend>
+      <li>fff 12</li>
+      <li>fff "admin"</li>
+      <li>fff "civet"</li>
+      <li>fff :civet</li>
+    </ul>
+  </section>
+
+  <section id="console4">
+    <h2>The Rails Console 4</h2>
+    Inspecting objects:
+    <p>
+    <ul class="dothis"><legend>pv/tv</legend>
+      <li>User.all # shows CBRAIN's default tabular output</li>
+      <li>u = User.last</li>
+      <li>pv u</li>
+      <li>tv u</li>
+      <li>tv a: 1, b: 2</li>
+      <li>table (1..5).map { |x| [x,x*x] }</li>
+    </ul>
+    <p>
+    pv works with <em>Userfile</em>, <em>CbrainTask</em>, <em>User</em>, <em>Group</em>, <em>DataProvider</em>, <em>RemoteResource</em>, <em>Site</em> and <em>Tool ToolConfig</em>.
+    <p>
+    tv works with anything that has <em>.attributes</em> or <em>.to_h</em>
+  </section>
+
+  <section id="console5">
+    <h2>The Rails Console 5</h2>
+    <em>plog</em> prints the CBRAIN logs for an object.
+    <p>
+    <ul class="dothis"><legend>plog</legend>
+      <li>u = User.last</li>
+      <li>plog u</li>
+      <li>u.addlog("Hello world")</li>
+      <li>plog u</li>
+    </ul>
+  </section>
+
+  <section id="console6">
+    <h2>The Rails Console 6</h2>
+    CBRAIN view helpers can be invoked directly:
+    <p>
+    <ul class="dothis"><legend>View helpers</legend>
+      <li>pretty_size 124_235_334</li>
+      <li>pretty_past_date 26462383.seconds.ago</li>
+      <li>puts array_to_table [1,2,3,4,5,6,7], table_class: 'junk'</li>
+      <li>edit_task_path(CbrainTask.first)</li>
+      <li>puts user_select()</li>
+      <li>x = "Jack &amp; Jill"; puts h(x)</li>
+      <li>y = x.html_safe; puts y; puts h(y)</li>
+      <li>puts y.class; puts y.class.superclass</li>
+    </ul>
+  </section>
+
+  <section id="console7">
+    <h2>The Rails Console 7</h2>
+    Admin utilities:
+    <p>
+    <ul class="dothis"><legend>Admin</legend>
+      <li>do_log</li>
+      <li>b=Bourreau.first</li>
+      <li>online b</li>
+      <li>offline b</li>
+      <li>acttasks</li>
+      <li>trans</li>
+    </ul>
+    <ul class="dothis"><legend>ibc</legend>
+      <li>ibc</li>
+      <li><strong>A full Bourreau control interface, interactive</strong></li>
+      <li>('q' to quit, btw)</li>
+    </ul>
+  </section>
+
+  <section id="console8">
+    <h2>The Rails Console 8</h2>
+    For programmers: Entering an object
+    <p>
+    <ul class="dothis"><legend>Try this!</legend>
+      <li>self</li>
+      <li>country # should crash</li>
+      <li>u = User.first</li>
+      <li>irb u # within IRB, there is an <em>irb</em> command</li>
+      <li>self</li>
+      <li>country</li>
+      <li>new_record?</li>
+      <li>attributes</li>
+      <li>addlog "yep"</li>
+      <li>puts getlog</li>
+      <li>exit # to return to <em>main</em></li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="xxx">
+    <h2>header here</h2>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>blah1</li>
+      <li>blah2</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="xxx">
+    <h2>header here</h2>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>blah1</li>
+      <li>blah2</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+</section>
+
+
+<!-- ############################## -->
+<!-- ############################## -->
+<!-- ############################## -->
+
+<section>
+
+  <section id="end">
+    <h1>The End</h1>
+    <h2 class="glow">Thank you</h2>
+
+    <strong>The CBRAIN features described here were created by:</strong>
+    <br>
+    Tarek Sherif<br>
+    Natacha Beck<br>
+    R&eacute;mi Bernard<br>
+    Tristan Aumentado-Armstrong<br>
+    Tristan Glatard<br>
+    Pierre Rioux
+    <p>
+    <strong>Project management:</strong>
+    <br>
+    Marc-&Eacute;tienne Rousseau<br>
+    Shawn Brown
+  </section>
+
+</section>
+
+    </div>
+  </div>
+
+<!-- ############################## -->
+<!-- ############################## -->
+<!-- ############################## -->
+
+  <!-- Declares a filter to turn white into CBRAIN blue, #05A3D6 -->
+
+  <svg height="0">
+    <filter id="cbrainblue">
+      <feColorMatrix values="0.0196 0.0    0.0    0 0
+                             0.0    0.6392 0.0    0 0
+                             0.0    0.0    0.8392 0 0
+                             0      0      0      1 0"/>
+    </filter>
+  </svg>
+
+  <!-- Main reveal.js setup -->
+
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.js"></script>
+  <script src="plugin/highlight/highlight.js"></script>
+  <script>
+    Reveal.initialize(
+    { slideNumber: true, history: true }
+    );
+    hljs.initHighlightingOnLoad();
+  </script>
+
+  <!-- Styles -->
+
+  <style>
+
+    /* Headers */
+
+    @keyframes glowing {
+        0% { text-shadow: 0.0em 0.0em 0.0em #0cc; }
+       25% { text-shadow: 0.0em 0.0em 0.2em #0dd; }
+       50% { text-shadow: 0.0em 0.0em 0.4em #0ee; }
+       75% { text-shadow: 0.0em 0.0em 0.2em #0dd; }
+      100% { text-shadow: 0.0em 0.0em 0.0em #0cc; }
+    }
+
+    .reveal h1,
+    .reveal h2,
+    .reveal h3,
+    .reveal h4,
+    .reveal h5 {
+      color: #ffffff;
+      text-shadow: 0.0em 0.0em 0.2em #0cc;
+    }
+
+    /* Text styles: em, strong, b, i */
+
+    .reveal .glow {
+      animation: glowing 3555ms infinite;
+    }
+
+    .reveal em {
+      color: yellow;
+      font-style: normal; /* yes please! */
+    }
+    .reveal strong {
+      color: #0ff;  /* funny, I'm using RGB with only three digits today */
+    }
+    .reveal b {
+      color: #00f;
+    }
+    .reveal i {
+      color: #f00;
+      font-style: normal; /* yes please! */
+    }
+
+    /* Misc */
+
+    .reveal section .dothis {
+      color: #ccc;
+      border: 3px solid #f6f;
+      border-radius: 0.5em;
+      padding: 0.5em 0.5em 0.5em 1.5em;
+      text-align: left;
+      margin: 1em 0 0 0;
+      position: relative;
+    }
+    .reveal section .dothis legend {
+      color: #f6f;
+      border: 3px solid #f6f;
+      position: absolute;
+      font-size: 70%;
+      left: 1em;
+      top: -1em;
+      background: black;
+      border-radius: 0.3em;
+      padding: 0 0.1em 0 0.1em;
+    }
+    @keyframes blinkcursor {
+      50% { opacity: 0; }
+    }
+    .reveal .cursor {
+      color: #f90;
+      animation: blinkcursor 1s step-start infinite;
+    }
+    .reveal section img {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+    .reveal section img.cbblue {
+      filter: url(#cbrainblue);
+    }
+    .reveal pre {
+      background: #033;
+      /* padding: 0.2em 0.5em 0.3em 0.5em; */
+      padding: 0;
+      width: auto;
+    }
+    .reveal pre.compact {
+      display: inline-block;
+    }
+    .reveal pre.large {
+      font-size: 120%;
+    }
+    .reveal pre.medium {
+      font-size: 100%;
+    }
+    .reveal pre.supersmall {
+      font-size: 40%;
+    }
+    .reveal pre > code.nomaxheight {
+      max-height: none;
+    }
+    .reveal .cell {
+      display: table-cell;
+    }
+    .reveal th {
+      color: #0aa;
+    }
+    .reveal .transp {
+      background-color: transparent;
+    }
+    .reveal .resize80 { /* for pics */
+      width: 80%;
+      height: 80%;
+    }
+    .reveal .resize40 { /* for pics */
+      width: 40%;
+      height: 40%;
+    }
+    .reveal .resize10 { /* for pics */
+      width: 10%;
+      height: 10%;
+    }
+
+    .hljs-comment {  /* I don't like the default grey */
+      color: #c9a929;
+    }
+
+  </style>
+</body>
+
+</html>
