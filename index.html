@@ -2,6 +2,7 @@
 <html>
 
 <head>
+  <title>CBRAIN Training Workshop</title>
   <link rel="stylesheet" href="css/reveal.css">
   <link rel="stylesheet" href="css/night.css">
   <link rel="stylesheet" href="plugin/highlight/style/monokai-sublime.css">
@@ -13,55 +14,16 @@
     <div class="slides">
 
 <section id="tmp">
-TMP NOTES, DELETE THIS SLIDE
+TMP NOTES, DELETE THIS SLIDE<br>
 <small>
 <pre>
-                                                                                                                              x
-CBRAIN_SKIP_VALIDATIONS
-CBRAIN_DEBUG_SQL_SOURCE_LINES
-CBRAIN_DEBUG_TRACES
-CBRAIN_BOUTIQUES_DUMPDIR CBRAIN_BOUTIQUES_DUMPTASK
 
-migrations
 
-rails side:
-  lib
-  cookies + sessions
+order
+reveal columns
+legends
+h2
 
-style
-  rdoc
-  github info
-
-  console on other bourreaux
-
-log examination
-  portal
-    timestamps
-  bourreau
-
-cbrain helpers
-  puts_color
-  puts_timer
-
-generating rdoc
-
-users:
-  normal vs admin
-  use several browsers or private mode of browser
-
-github fork and PR protocol
-
-multi sessions in browser
-
-inspecting processes
-
-running tests
-  writing tests
-  API tests
-
-creating a task
-creating a model
-creating a viewer
 </pre>
 </small>
 </section>
@@ -74,7 +36,7 @@ creating a viewer
     <h1>Developer Workshop</h1>
     Pierre Rioux
     <br>
-    <span>March-April 2019</span>
+    <span>April 2019</span>
   </section>
 
 <!-- ****************************** -->
@@ -136,7 +98,7 @@ creating a viewer
 <!-- ****************************** -->
 
   <section id="environments">
-    <h2>Rails Environments</h2>
+    <h2>Rails environments</h2>
     Normally, three of those: <em>development</em>, <em>production</em> and <em>test</em>.
     <p>
     Each can potentially connect to a <strong>distinct</strong> database.
@@ -158,7 +120,7 @@ creating a viewer
 <!-- ****************************** -->
 
   <section id="railscore">
-    <h2>Rails Core</h2>
+    <h2>Rails core</h2>
     Located under <em>app/</em>
     <p>
     Rails is a <strong>MVP</strong> framework, so you'll find<br>
@@ -566,21 +528,817 @@ backtrace_silencers.rb                  inflections.rb                          
 
 <!-- ****************************** -->
 
-  <section id="xxx">
-    <h2>header here</h2>
-    <ul class="dothis"><legend>Do this</legend>
-      <li>blah1</li>
-      <li>blah2</li>
+  <section id="rdoc">
+    <h2>Generating the local doc</h2>
+    All CBRAIN code is self-documenting using <em>rdoc</em>.
+    <p>
+    <ul class="dothis"><legend>Make HTML pages</legend>
+      <li>cd {YOUR_CBRAIN_ROOT}</li>
+      <li>bash script/make_local_doc.sh</li>
+      <li>(wait, then cut-and-paste the URLs)</li>
+      <li>(search for 'save_with_lo')</li>
     </ul>
   </section>
 
 <!-- ****************************** -->
 
-  <section id="xxx">
-    <h2>header here</h2>
+  <section id="migrations1">
+    <h2>Migrations</h2>
+    <ul>
+      <li>DB Migrations are managed by Rails</li>
+      <li>They are stored in timestamped files in
+          <em>db/migrations/nnnn.rb</em></li>
+      <li>The full schema in <em>db/schema.rb</em> is re-dumped after every change</li>
+      <li>Migrations are <strong>rollback-able</strong></li>
+    </ul>
+  </section>
+
+  <section id="migrations2">
     <ul class="dothis"><legend>Do this</legend>
-      <li>blah1</li>
-      <li>blah2</li>
+      <li>cd BrainPortal</li>
+      <li>rails generate migration AddProvinceToUsers</li>
+      <li>edit the new file</li>
+      <li>add in method 'change':<br><em>add_column :users, :province, :string</em><br>
+      <li>rails db:migrate</li>
+      <li>check with the console:
+        <ul>
+          <li>u = User.last</li>
+          <li>u.province = 'QC'</li>
+          <li>tv.save</li>
+          <li>tv u</li>
+        </ul>
+      <li>check <em>db/schema.rb</em> for changes; make sure only the province is added</li>
+      <li>rails db:rollback</li>
+      <li>if your installation is old: <em>git checkout db/schema.rb</em></li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="sessions">
+    <h2>Rails Sessions</h2>
+    <ul>
+      <li>Single encrypted cookie</li>
+      <li>Name: in <em>BrainPortal/initializers/session_store.rb</em></li>
+      <li>Content: a serialized hash table</li>
+      <li>Shows up in Rails as method <em>session</em> with hash semantics</li>
+      <li>Two important things in it:
+        <ol>
+          <li>Key <em>user_id</em>: if exists, this user is logged in!</li>
+          <li>Key <em>session_id</em>: a 40 digits hex identifier</li>
+        </ol>
+      </li>
+      <li>Cookie size limit: 4096 characters</li>
+    </ul>
+    <ul class="dothis"><legend>View the cookie</legend>
+      <li>In your browser, find the cookie manager</li>
+      <li>Find the cookie named <em>BrainPortal5_Session</em> associated with <em>localhost</em></li>
+      <li>It's a bunch of hex digits!</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="cb_session1">
+    <h2>Cbrain Sessions 1</h2>
+    <ul>
+      <li>Added custom support for larger data</li>
+      <li>Storage: ActiveRecord <em>LargeSessionInfo</em></li>
+      <li>One such record is created when the user logs in</li>
+      <li>Main key is the <em>session_id</em> of Rails Session</li>
+      <li>The utility hash is stored in column <em>data</em>, serialized</li>
+      <li>Within the portal, it is accessible with method <em>cbrain_session</em></li>
+      <li>Access wrapper class: <em>CbrainSession</em></li>
+    </ul>
+  </section>
+
+  <section id="cb_session2">
+    <h2>Cbrain Sessions 2</h2>
+    <ul class="dothis"><legend>Inspecting the cbrain_session</legend>
+      <li>(log out and log back in from the interface)</li>
+      <li>In the console:</li>
+      <li>LargeSessionInfo.all</li>
+      <li>s = LargeSessionInfo.last</li>
+      <li>tv s.data</li>
+      <li>In the interface, go to the file manager and sort by a column</li>
+      <li>In the console:
+      <li>s.reload; tv s.data</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="workspace1">
+    <h2>Workspace Recommendations</h2>
+    <ol>
+      <li>Use one shell for the rails server</li>
+      <li>Clear the server's terminal window between requests (<em>&#x2318;-K</em> on Macs)</li>
+      <li>Use one shell for the console</li>
+      <li>Do not exit them unless necessary!</li>
+      <li>One browser window for an admin user (with tabs)</li>
+      <li>Set <em>.bashrc</em> shortcuts to the main directories of the code base</li>
+      <li>If you need normal and admin users within the same browser, use the browser's <strong>incognito</strong> or <strong>private</strong> mode for one of them</li>
+      <li>Or use distinct browser (e.g. Safari+Firefox+Chrome, and each can have a <strong>private</strong> session!)</li>
+    </ol>
+  </section>
+
+  <section id="bashrc">
+    <h2>Example bashrc shortcuts</h2>
+<pre><code class="shell">
+#------------------------------------------------------------
+# CBRAIN Work Paths
+#------------------------------------------------------------
+cb=~/CBRAIN
+
+p=$cb/BrainPortal
+pl=$p/lib
+ph=$p/app/helpers
+pc=$p/app/controllers
+pss=$p/public/stylesheets
+pjs=$p/public/javascripts
+pm=$p/app/models
+pv=$p/app/views
+pi=$p/config/initializers
+</code></pre>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="style1">
+    <h2>CBRAIN coding style</h2>
+    <ul>
+      <li>We use standard Ruby and Rails style, in general</li>
+      <li>We have specific rules in the <A href="https://github.com/aces/cbrain/wiki/Programming-Style">Wiki on GitHub</a></li>
+      <li>We also require all methods that are accessible to other programmer to have documentation in <em>rdoc</em> format</li>
+      <li>Private methods and methods not meant to end up in the documentation need to be annotated with <em>#:nodoc:</em>
+    </ul>
+    <ul class="dothis"><legend>Let's view some</legend>
+      <li>Have a look at <em>BrainPortal/lib/act_rec_log.rb</em></li>
+      <li>Check the huge two documentation blocks before <em>class ActRecLog</em>0
+      <li>The first is hidden, the second is shown</li>
+      <li>Blank lines are critical!</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="style2">
+    <h2>CBRAIN coding style</h2>
+    From <em>BrainPortal/lib/act_rec_log.rb</em>:
+<pre><code class="ruby">
+  # Creates a custom log entry with the revision info about +anobject+,
+  # which is any object or class, supplied as the first argument. Its
+  # revision_info will be extracted for the final message.
+  #
+  # Using this method on an ActiveRecord +obj+ with the class +Abcd+
+  # in argument, like this:
+  #
+  #     obj.addlog_revinfo(Abcd,"hello")
+  #
+  # results is a log entry like this one:
+  #
+  #     "Abcd revision 123 prioux 2009-05-23 hello"
+  def addlog_revinfo(anobject, message=nil, caller_level=0)
+    # code not shown here
+  end
+</code></pre>
+  When generating the doc:<p>
+  <ul>
+    <li>Text with <em>+word+</em> will be highlighted</li>
+    <li>Text indented MORE than the first comment line are code block</li>
+    <li><strong>No blank lines</strong> must be between the comment and the <em>def</em> line!</li>
+  </ul>
+  </section>
+
+  <section id="style3">
+    <h2>CBRAIN coding style</h2>
+    Generated doc appearance:<p>
+    <img src="images/rdoc.png">
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="bdiff">
+    <h2>Bourreau differences</h2>
+    Most Bourreau code is identical to the Portal's:<p>
+    <ul>
+      <li>All models are the same (with for one more: <em>bourreau_worker.rb</em>)</li>
+      <li>All libraries (in <em>/lib</em>) too</li>
+    </ul>
+    <p>The main difference are:<p>
+    <ul>
+      <li>The bourreau has NO views, stylesheets, etc</li>
+      <li>The bourreau has no <em>database.yml</em></li>
+      <li>The bourreau has only one controller: <em>controls_controller.rb</em></li>
+      <li>The boot process checks different things</li>
+      <li>The <em>CbrainTask</em> subclasses each inherit different code</li>
+    </ul>
+  </section>
+
+  <section id="bconsole">
+    <h2>Console on Bourreau</h2>
+    <em>rails console</em> does <strong>not</strong> work from <em>Bourreau/</em>.
+    <p>
+    <i>IMPORTANT:</i> because of PTY allocation conflicts, use
+    a shell <strong>distinct</strong> from the one the bourreau
+    master connection was started from.
+    <p>
+    <ul class="dothis"><legend>Bourreau console</legend>
+      <li>start a new shell if necessary</li>
+      <li>start a portal console</li>
+      <li>Bourreau.all</li>
+      <li>b=Bourreau.find(123)</li>
+      <li>b.console</li>
+      <li># Or, as a class method: Bourreau.console(123)</li>
+      <li>exit # to return to Portal's console</li>
+    </ul>
+    <p>
+    <i>IMPORTANT:</i> Hitting CTRL-C exits from the Bourreau's console!
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="debug1">
+    <h2>Debugging features</h2>
+    Several <strong>environment variables</strong> add debugging features:
+    <p>
+    <ul>
+      <li><em>CBRAIN_SKIP_VALIDATIONS</em>: affect boot process</li>
+      <li><em>CBRAIN_DEBUG_SQL_SOURCE_LINES</em>: trace source of SQL statement</li>
+      <li><em>CBRAIN_DEBUG_TRACES</em>: trace system() and popen() calls</li>
+      <li><em>CBRAIN_BOUTIQUES_DUMPDIR</em> and <em>CBRAIN_BOUTIQUES_DUMPTASK</em>: dump the template-generated Boutiques code for tasks</li>
+    </ul>
+    <p>
+    All these variables can be used both when running the server or running the console.
+  </section>
+
+  <section id="debug2">
+    <h3>Debug:<br><em>CBRAIN_SKIP_VALIDATIONS</em></h3>
+    Use this when the boot process fails within<br>
+    validation code and you want a minimal console.
+    <p>
+    Some validations are critical and cannot be<br>
+    avoided, but all others will be skipped.
+    <p>
+    <ul class="dothis"><legend>Compare the messages</legend>
+      <li>rails console</li>
+      <li>CBRAIN_SKIP_VALIDATIONS=1 rails console</li>
+    </ul>
+  </section>
+
+  <section id="debug3">
+    <h3>Debug:<br><em>CBRAIN_DEBUG_SQL_SOURCE_LINES</em></h3>
+    When this environment variable is set to a number <strong>N</strong>,<br>
+    the logs will show a stack trace of the last <strong>N</strong> Ruby<br>
+    statements that led to issuing any SQL statements.
+    <p>
+    ActiveRecord internal methods are hidden, only code<br>
+    from the CBRAIN side is shown.
+    <p>
+    <ul class="dothis"><legend>Try it</legend>
+      <li>CBRAIN_DEBUG_SQL_SOURCE_LINES=3 rails console</li>
+      <li>group_select(:z, groups: Group.all.to_a);1</li>
+      <li>fff :hello</li>
+    </ul>
+  </section>
+
+  <section id="debug4">
+    <h3>Debug:<br><em>CBRAIN_DEBUG_TRACES</em></h3>
+    When this environment variable is set, the logs will<br>
+    show the arguments used for <em>system()</em> and <em>popen()</em> calls.
+    <p>
+    <ul class="dothis"><legend>Try it</legend>
+      <li>CBRAIN_DEBUG_TRACES=1 rails console</li>
+      <li>system("touch .")
+      <li>IO.popen("uname -a") { |fh| puts fh.read }</li>
+    </ul>
+  </section>
+
+  <section id="debug5">
+    <h3>Debug:<br><em>CBRAIN_BOUTIQUES_DUMPDIR</em></h3>
+    When this environment variable is set to an existing <strong>directory</strong>,<br>
+    code generated by the Boutiques integrator will be dumped there.
+    <p>
+    <ul class="dothis"><legend>Try it</legend>
+      <li>mkdir /tmp/dump</li>
+      <li>CBRAIN_DEBUG_TRACES=/tmp/dump rails console</li>
+      <li>examine the content of /tmp/dump now</li>
+    </ul>
+    <p>
+    If only a specific Boutiques task is of interest, its name (e.g. <em>"FslBet"</em>)<br>
+    can be specified in <em>CBRAIN_BOUTIQUES_DUMPTASK</em><br>
+    and only that task's code will be dumped.
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="logs1">
+    <h2>Examining logs</h2>
+    The <em>log/</em> directory under each Rails app contains<br>
+    many useful logs. Their content is <strong>cumulative</strong>,<br>
+    so consider erasing them from time to time.
+    <p>
+    <ul>
+      <li><em>.../log/development.log</em></li>
+      <li><em>.../log/production.log</em></li>
+      <li><em>Bourreau/log/server_start.log</em> # boot control script capture</li>
+    <ul>
+    <p>
+    They are mostly useful when running the <strong>server</strong>;<br>
+    console statements are not logged there.
+    <p>
+    In <em>development</em>, the logs contain SQL statements that<br>
+    are <strong>colored by type of action</strong>, and also include <strong>SQL time information</strong>.
+  </section>
+
+  <section id="logs2">
+    <h2>Log examples</h2>
+<pre>
+<span style="color:cyan">  Group Load (2.3ms)</span>  SELECT `groups`.* FROM `groups` INNER JOIN `groups_users`
+ON `groups`.`id` = `groups_users`.`group_id` WHERE `groups_users`.`user_id` = 1 ORDER
+BY `groups`.`name` ASC
+<span style="color:cyan">  EveryoneGroup Load (0.4ms)</span>  SELECT  `groups`.* FROM `groups` WHERE `groups`.`type`
+IN ('EveryoneGroup') AND `groups`.`name` = 'everyone' LIMIT 1
+<span style="color:cyan">  Tool Load (0.6ms)</span>  SELECT `tools`.* FROM `tools` WHERE (category &lt;&gt; 'background')
+<span style="color:magenta">   (2.7ms)</span>  SELECT COUNT(count_column) FROM (SELECT  1 AS count_column FROM `cbrain_tasks`
+WHERE (cbrain_tasks.status &lt;&gt; 'Preset' AND cbrain_tasks.status &lt;&gt; 'SitePreset')
+AND (cbrain_tasks.workdir_archived = 0 OR cbrain_tasks.workdir_archived IS NULL)
+AND `cbrain_tasks`.`user_id` IN (1, 2, 3, 4, 5, 6, 8, 11, 23, 26, 27, 28, 29,
+30, 31, 32, 34, 37, 43, 44, 45, 46, 51, 58, 59, 60, 61, 71) AND `cbrain_tasks`.`bourreau_id`
+IN (2, 5, 8, 9, 10, 11, 12) LIMIT 10) subquery_for_count
+<span style="color:cyan">  CACHE (0.0ms)</span>  SELECT  `groups`.* FROM `groups` WHERE `groups`.`id` = 2 LIMIT 1
+<span style="color:yellow">  Rendered portal/welcome.html.erb within layouts/application (448.1ms)</span>
+<span style="color:yellow">  Rendered layouts/_section_account.html.erb (7.3ms)</span>
+<span style="color:cyan">  CACHE (0.1ms)</span>  SELECT  `remote_resources`.* FROM `remote_resources`
+WHERE `remote_resources`.`id` = 1 LIMIT 1
+<span style="color:yellow">  Rendered layouts/_section_menu.html.erb (7.7ms)</span>
+<span style="color:yellow">  Rendered messages/_message_display.html.erb (0.5ms)</span>
+<span style="color:yellow">  Rendered layouts/_section_main.html.erb (3.1ms)</span>
+<span style="color:yellow">  Rendered layouts/_section_footer.html.erb (0.4ms)</span>
+<span style="color:#0f0">User: admin on instance PID-3162 from localhost (127.0.0.1) using Firefox 66.0</span>
+</pre>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="puts1">
+    <h2>Debug: <em>puts</em> statements!</h2>
+    You can insert <em>puts</em> statements most anywhere
+    while debugging.
+    <p>
+    CBRAIN provides variations that colorize the output:
+    <p>
+    <table>
+      <tr><th>Method</th><th>Effect in logs or terminal</th></tr>
+      <tr><td>puts_red     "hello"</td><td><span style="color:#f00">hello<span></td></tr>
+      <tr><td>puts_green   "goodbye"</td><td><span style="color:#0f0">goodbye<span></td></tr>
+      <tr><td>puts_blue    "why"</td><td><span style="color:#00f">why<span></td></tr>
+      <tr><td>puts_yellow  "why"</td><td><span style="color:#ff0">why<span></td></tr>
+      <tr><td>puts_magenta "hello"</td><td><span style="color:#f0f">hello<span></td></tr>
+      <tr><td>puts_cyan    "goodbye"</td><td><span style="color:#0ff">goodbye<span></td></tr>
+    </table>
+  </section>
+
+  <section id="puts2">
+    <h2>Debug: <em>puts</em> for timing</h2>
+    When debugging performance problems, <em>puts_timer</em> prints<br>
+    the time elapsed between each call to itself:
+    <p>
+<pre><code class="ruby">
+puts_timer "Checking code"
+long_step_one()
+puts_timer "Finished step 1", "green"
+long_step_two()
+puts_timer "Finished step 2", "red"
+</code></pre>
+    <p>
+<pre>
+Checking code
+<span style="color:#0f0">Finished step 1: diff= 46.345642s / cumul= 46.345642s</span>
+<span style="color:#f00">Finished step 2: diff= 30.784296s / cumul= 77.129938s<span>
+</pre>
+    <ul class="dothis"><legend>Try it</legend>
+      <li>Edit <em>BrainPortal/app/controllers/users_controllers.rb</em></li>
+      <li>In method <em>def show</em>, add some puts_timer around the assignments</li>
+      <li>Click on <em>My Account</em> and look at the logs</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="binding">
+    <h2>binding.pry</h2>
+    Inserting <em>binding.pry</em> most anywhere in the code will<br>
+    trigger the execution to stop at that point and a <em>pry</em><br>
+    prompt to appear. <em>pry</em> is a small debug console.
+    <p>
+    <ul class="dothis"><legend>Debug this</legend>
+      <li>Edit <em>BrainPortal/app/controllers/users_controllers.rb</em></li>
+      <li>Find method <em>def show</em></li>
+      <li>Add <em>binding.pry</em> just before <em>@log =...</em></li>
+      <li>Click on <em>My Account</em></li>
+      <li>Have a look at your server's window: see a prompt!</li>
+      <li>Inspect things: <em>@default_bourreau</em>, or <em>request()</em>, or <em>params()</em></li>
+      <li>Type <em>step</em> to step each statement (including entering)</li>
+      <li>Type <em>next</em> to step each statement (without entering)</li>
+      <li>Type <em>exit</em> to leave <em>irb</em> and continue execution</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="methodmethod">
+    <h2>Finding where code is defined</h2>
+    Most Ruby methods that are explicitely written by<br>
+    someone can be inspected with the <em>method</em> method.
+    <p>
+    It can return the filename and line number where a<br>
+    method was defined.
+    <p>
+    <ul class="dothis"><legend>A method named 'method'?</legend>
+      <li>u=User.last</li>
+      <li>u.visible_users</li>
+      <li>u.method(:visible_users)</li>
+      <li>u.method(:visible_users).source_location</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="tests1">
+    <h2>Running the tests</h2>
+    We use <em>rspec</em> to run unit tests.
+    <p>
+    The test framework is all under <em>BrainPortal/spec/</em>.
+    <p>
+    A requirement: the test database must exist.<br>
+    The DB will be cleaned and reseeded as needed.
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>rspec spec # runs all tests</li>
+      <li>rspec spec/models/user_spec.rb # runs just one file</li>
+      <li>rspec spec/models/user_spec.rb:36 # runs just one test</li>
+    </ul>
+  </section>
+
+  <section id="tests2">
+    <h2>Writing unit tests</h2>
+    A <em>rspec</em> explanation is too involved to discuss here.
+    <p>
+    Another day maybe.
+    <p>
+    <ul class="dothis"><legend>Let's have a look</legend>
+      <li>Go to <em>BrainPortal/spec</em></li>
+      <li>Examine factories/portal_factories.rb</li>
+      <li>Examine models/user_spec.rb</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="apitest1">
+    <h2>API tests</h2>
+    We have <strong>two distinct frameworks</strong> to test API requests to<br>
+    a CBRAIN server running in a <em>test</em> environment:
+    <p>
+    <ul>
+      <li>A <em>curl</em>-based framework, written in <em>Perl</em></li>
+      <li>A <em>Ruby</em>-based framework, which invokes the API
+          classes <strong>generated from Swagger's spec</strong></li>
+    </ul>
+    <p>
+    Both frameworks use the same set of small test<br>
+    spec files called <em>reqfiles</em>.
+    <p>
+    Everything is under <em>BrainPortal/test_api</em>.
+  </section>
+
+  <section id="apitest2">
+    <h2>Curl-based API tests</h2>
+    <ul class="dothis"><legend>Let's have a look</legend>
+      <li>Go to <em>BrainPortal/test_api</em></li>
+      <li>Examine <em>reqfiles/users/badnormpatch/*</em> (info in <em>reqfiles/README.md</em></li>
+      <li>We test that a normal user cannot edit an admin user's full name</li>
+      <li>cd BrainPortal</li>
+      <li>rails server puma -p 3000 -e test</li>
+      <li>cd BrainPortal/test_api</li>
+      <li>perl curl_req_tester.pl badnormpatch</li>
+      <li>perl curl_req_tester.pl</li>
+    </ul>
+    <p>
+    Note: verbosity and debug traces can be obtained with <em>-v2</em>.. <em>-v9</em>.
+  </section>
+
+  <section id="apitest3">
+    <h2>Ruby+Swagger API tests</h2>
+    <ul class="dothis"><legend>Let's have a look</legend>
+      <li>cd BrainPortal</li>
+      <li>rake db:seed:test:api</li>
+      <li>rails server puma -p 3000 -e test</li>
+      <li>rake cbrain:test:api:client badnormpatch</li>
+      <li>rake db:seed:test:api # must re-seed</li>
+      <li>rake cbrain:test:api:client</li>
+    </ul>
+    <p>
+    Note: verbosity and debug traces can be obtained with <em>-v2</em>.. <em>-v9</em>.
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="github1">
+    <h2>Protocol for PRs</h2>
+    Three repos are involved when making a change in CBRAIN:
+    <p>
+    <ol>
+      <li>The main GitHub <strong>repo</strong> for <em>aces/cbrain</em></li>
+      <li>Your development <strong>workspace repo</strong> on your desktop</li>
+      <li>Your GitHub <strong>fork</strong> of cbrain</li>
+    </ol>
+    <p>
+    Information should propagate between them in that cycle:
+    <p>
+    <h5>1 -&gt; 2 -&gt; 3 -&gt; 1, ... etc</h5>
+  </section>
+
+  <section id="github2">
+    <h2>Making a PR</h2>
+    <img class="resize60" src="images/git_triangle.png">
+    <p>
+    <small>From my <A href="https://prioux.github.io/git-presentation">GIT presentation</a> (PDF)</small>
+  </section>
+
+  <section id="github3">
+    <h2>Making a PR</h2>
+    Follow these steps:
+    <p>
+    <ol>
+      <li>git checkout <strong>dev</strong> # usually</li>
+      <li>git pull <em>aces</em> dev # or '<em>origin</em>', basically the MAIN repo</li>
+      <li>git branch <strong>mybranchname</strong></li>
+      <li>git checkout <strong>mybranchname</strong></li>
+      <li>(modify, commit)
+      <li>git push <em>myfork</em> <strong>mybranchname</strong></li>
+      <li>(go to GitHub, make PR into <strong>dev</strong>)</li>
+      <li>(make more commits to <strong>mybranchname</strong>, push them to <em>myfork</em>)</li>
+      <li>When the PR is merged, switch to <strong>dev</strong>, pull from <em>aces</em></li>
+      <li>git delete -d <strong>mybranchname</strong></li>
+      <li>(delete <strong>mybranchname</strong> in <em>myfork</em> on GitHub)</li>
+      <li>git remote prune <em>myfork</em></li>
+    </ol>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="procnames">
+    <h2>Process Names</h2>
+    The <em>Ruby</em> processes for the servers, consoles and Bourreaux<br>
+    generally rename themselves. Also, <em>ssh</em> master connections<br>
+    often include a dummy <em>SendEnv=</em> option that is only there<br>
+    to help identify which service they connect to.
+    <p>
+    Example of <em>ps</em> process names you could see:
+    <p>
+    <ul>
+      <li>CBRAIN Console BrainPortal MyName PID-83539</li>
+      <li>CBRAIN Server BrainPortal MyName</li>
+      <li>CBRAIN Server Bourreau MyName 1234</li>
+      <li>ssh -q -n -N -x -M -o SendEnv=Bourreau_Beluga -p 22 -A <strong>...</strong></li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="boutiques1">
+    <h2>Boutiques Integration</h2>
+    <img src="https://boutiques.github.io/images/logo.png" class="resize10" style="float: left">
+    Boutiques is described at a high level in my CBRAIN presentation*. From a single <em>JSON</em> file, Portal, Bourreau and View code is generated and linked to the rails run-time. This happens only once, when the system boots.
+    <p>
+    The code is all templated in <em>BrainPortal/lib/cbrain_task_generators</em>.
+    <p>
+    The file "schema_task_generator.rb" generates everything using the <em>JSON</em> descriptor, and the content of <em>templates/*.erb</em>
+    <p>
+    <small>* <a href="https://prioux.github.io/cbrain-presentation/index.html#/tasks37">3 slides here</a></small>
+  </section>
+
+  <section id="boutiques2">
+    <h2>Boutiques Integration</h2>
+    <ul class="dothis"><legend>Let's have a look</legend>
+      <li>cd <em>BrainPortal/cbrain_plugins/cbrain-plugins-neuro/cbrain_task_descriptors</em></li>
+      <li>Edit the description at the very end of <em>fsl_bet.json</em>
+      <li>Restart your console or server</li>
+      <li>In the console:</li>
+      <li>CbrainTask::FslBet.generated_from.descriptor["description"]</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="assets">
+    <h2>Static Assets</h2>
+    Static assets are placed in <em>BrainPortal/public/*</em>
+    <p>
+    In a production environment, the Rails server does <strong>not</strong> serve them, but assumes another more efficient server will provide them.
+    <p>
+    Some assets live in <em>BrainPortal/app/assets</em> and are compiled into <em>.../public/assets/</em>.
+    <p>
+    <ul class="dothis"><legend>Dark Mode?</legend>
+      <li>cd <em>BrainPortal/app/assets/stylesheets</em></li>
+      <li>edit cbrain.css.erb</li>
+      <li>change <em>background: red</em> for the <em>body</em> element</li>
+      <li>Reload the page in your browser; scroll vertically</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="newmodel1">
+    <h2>Creating a new Userfile model</h2>
+    We will create a model for textfile that stores a CBRAIN log.
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>cd BrainPortal/cbrain_plugins/cbrain-plugins-base</li>
+      <li>cd userfiles</li>
+      <li>mkdir cbrain_log</li>
+      <li>cd cbrain_log</li>
+      <li>cp ../log_file/log_file.rb cbrain_log.rb</li>
+      <li>edit cbrain_log.rb; change first line:<br>
+          <pre>class CbrainLog &lt; TextFile</pre></li>
+      <li>rake cbrain:plugins:install:all</li>
+      <li>Restart server and console; now you have CbrainLog</li>
+    </ul>
+  </section>
+
+  <section id="newmodel2">
+    <h2>Creating a new Userfile model</h2>
+    We will create an actual object with type CbrainLog.
+    <p>
+    All of this is performed in the console:
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>DataProvider.all</li>
+      <li>(take note of the <strong>ID</strong> of any of them)</li>
+      <li>f = CbrainLog.new</li>
+      <li>f.data_provider_id = <strong>(ID here)</strong></li>
+      <li>f.name = "cb.log" ; f.user_id = 1 ; f.group_id = 2</li>
+      <li>f.save!</li>
+    </ul>
+  </section>
+
+  <section id="newmodel3">
+    <h2>Creating a new Userfile model</h2>
+    We will add content to the CbrainLog object.
+    <p>
+    All of this is performed in the console:
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>f = CbrainLog.last # if you don't already have</li>
+      <li>content = File.read('log/development.log'); 1</li>
+      <li>f.cache_writehandle { |fh| fh.write content }</li>
+      <li>f # examine the size!</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="viewer1">
+    <h2>Adding a viewer for CbrainLog</h2>
+    We will add a special viewer that will filter out<br>
+    coloring ANSI sequences and show the whole file in the browser
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>cd .../userfiles/cbrain_log</li>
+      <li>edit cbrain_log.rb, add:<br>
+        <pre>has_viewer :no_color</pre>
+      <li>mkdir views</li>
+      <li>cd views</li>
+      <li>create the file <em>_no_color.html.erb</em> with content below:</li>
+      <li>restart server, browse to file!</li>
+    </ul>
+<pre><code class="ruby">
+&lt;pre&gt;
+&lt;%  content = @userfile.cache_readhandle { |fh| fh.read } %&gt;
+&lt;%= content.gsub(/\e\[[\d\;]*m/,"") %&gt;
+&lt;/pre&gt;
+
+</code></pre>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="viewer2">
+    <h2>About that viewer</h2>
+    The viewer we just created has limitations that would<br>
+    normally be unacceptable:
+    <p>
+    <ul>
+      <li>The whole file content is rendered; what if it's many gigabytes?</li>
+      <li>We do not check if the content is synchronized. Conditions for viewers
+          can be specified, e.g.<br>
+          <pre>has_viewer :no_color, :if =&gt; Proc.new { checks_here }</pre>
+      </li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="newtask">
+    <h2>Creating a task</h2>
+    There is a full tutoral online for creating tasks<br>
+    using the standard CBRAIN methodology:
+    <p>
+    <a href="https://github.com/aces/cbrain/wiki/CbrainTask-Programmer-Guide">https://github.com/aces/cbrain/wiki/CbrainTask-Programmer-Guide</a>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="newapi1">
+    <h2>Inspecting routes</h2>
+    Rails stores all its allowed routes in<br>
+    <em>BrainPortal/config/routes.rb</em>
+    <p>
+    The file is a more or less a DSL with an easy-to-read structure.
+    <p>
+    <ul class="dothis"><legend>Do this</legend>
+      <li>Examine BrainPortal/config/routes.rb</li>
+      <li>In a shell with &gt;180 columns, run:</li>
+      <li>rake routes</li>
+    </ul>
+  </section>
+
+<!-- ****************************** -->
+
+  <section id="newapi2">
+    <h2>Creating a new action</h2>
+    We will create a new controller action, and make it<br>
+    available as an API call.
+    <p>
+    The action is a query: <strong>how many files does a user have,<br>
+    and what is the total disk space taken by them?</strong>
+  </section>
+
+  <section id="newapi3">
+    <ul class="dothis"><legend>Do this</legend>
+      <li>Edit BrainPortal/app/controllers/users_controller.rb</li>
+      <li>Add this method:<br>
+<pre><code class="ruby">def filecount
+  puts_red "MY API STARTING"
+  myfiles   = current_user.userfiles
+  @numfiles = myfiles.count
+  @totsize  = myfiles.sum(:size)
+  puts_green "MY API END"
+end
+</code></pre>
+      </li>
+      <li>Also add <em>:filecount</em> in <em>api_available</em> list</li>
+      <li>Edit BrainPortal/config/routes.rb</li>
+      <li>Add the highlighted line:<br>
+<pre>
+  resources :users,  :except =&gt; [ :edit ] do
+    member do
+      get  'change_password'
+      post 'switch'
+    end
+    collection do
+      <em>get  'filecount'</em>
+      get  'request_password'
+      post 'send_password'
+    end
+  end
+</pre>
+      </li>
+    </ul>
+  </section>
+
+  <section id="newapi4">
+    Let's try to trigger the code:
+    <p>
+    <ul class="dothis"><legend>Check it!</legend>
+      <li>Restart your server</li>
+      <li>In your browser, go to <em>http://localhost:3000/users/filecount</em></li>
+      <li>The page should be blank!</li>
+      <li>The server logs should say error 421</li>
+      <li>But the <strong>puts_color</strong> messages are there!</li>
+    </ul>
+  </section>
+
+  <section id="newapi5">
+    Let's add some view code now:
+    <p>
+    <ul class="dothis"><legend>JSON and HTML</legend>
+      <li>go to BrainPortal/app/views/users</li>
+      <li>Create <em>filecount.json.erb</em>:<br>
+<pre>
+{ "numfiles": &lt;%= @numfiles %&gt;, "totsize": &lt;%= @totsize %&gt; }
+</pre>
+      </li>
+      <li>Create <em>filecount.html.erb</em>:<br>
+<pre>
+My &lt;i&gt;HTML&lt;/i&gt; report: numfile=&lt;%= @numfiles %&gt;, totsize=&lt;%= @totsize %&gt;
+</pre>
+      </li>
+      <li>No need to restart server!</li>
+      <li>In your browser, go to <em>http://localhost:3000/users/filecount</em></li>
+      <li>Try also <em>http://localhost:3000/users/filecount.json</em></li>
     </ul>
   </section>
 
@@ -760,6 +1518,10 @@ backtrace_silencers.rb                  inflections.rb                          
     .reveal .resize80 { /* for pics */
       width: 80%;
       height: 80%;
+    }
+    .reveal .resize60 { /* for pics */
+      width: 60%;
+      height: 60%;
     }
     .reveal .resize40 { /* for pics */
       width: 40%;
