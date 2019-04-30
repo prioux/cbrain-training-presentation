@@ -133,9 +133,8 @@ pi=$p/config/initializers
     Each can potentially connect to a <strong>distinct</strong> database.
     <p>
     <ul class="dothis"><legend>Curious</legend>
-      <li>cd BrainPortal/db</li>
-      <li>cat database.yml</li>
       <li>cd BrainPortal/config</li>
+      <li>cat database.yml</li>
       <li>have a look at files there</li>
     </ul>
     <p>
@@ -717,7 +716,7 @@ C&gt; CBRAIN BrainPortal validation completed, 2019-03-29 19:28:09 -0400
         <ul>
           <li>u = User.last</li>
           <li>u.province = 'QC'</li>
-          <li>tv.save</li>
+          <li>u.save</li>
           <li>tv u</li>
         </ul>
       <li>check <em>db/schema.rb</em> for changes; make sure only the province is added</li>
@@ -738,7 +737,7 @@ C&gt; CBRAIN BrainPortal validation completed, 2019-03-29 19:28:09 -0400
     <h2>Rails sessions</h2>
     <ul>
       <li>Single encrypted cookie</li>
-      <li>Name: in <em>BrainPortal/initializers/session_store.rb</em></li>
+      <li>Name: in <em>BrainPortal/config/initializers/session_store.rb</em></li>
       <li>Content: a serialized hash table</li>
       <li>Shows up in Rails as method <em>session</em> with hash semantics</li>
       <li>Two important things in it:
@@ -867,7 +866,7 @@ C&gt; CBRAIN BrainPortal validation completed, 2019-03-29 19:28:09 -0400
     <p>
     <ul class="dothis"><legend>Try it</legend>
       <li>mkdir /tmp/dump</li>
-      <li>CBRAIN_DEBUG_TRACES=/tmp/dump rails console</li>
+      <li>CBRAIN_BOUTIQUES_DUMPDIR=/tmp/dump rails console</li>
       <li>examine the content of /tmp/dump now</li>
     </ul>
     <p>
@@ -1105,11 +1104,12 @@ Checking code
       <li>cd BrainPortal</li>
       <li>rails server puma -p 3000 -e test</li>
       <li>cd BrainPortal/test_api</li>
-      <li>perl curl_req_tester.pl badnormpatch</li>
-      <li>perl curl_req_tester.pl</li>
+      <li>RAILS_ENV=test perl curl_req_tester.pl badnormpatch</li>
+      <li>RAILS_ENV=test perl curl_req_tester.pl</li>
     </ul>
     <p>
-    Note: verbosity and debug traces can be obtained with <em>-v2</em>.. <em>-v9</em>.
+    Note: verbosity and debug traces can be obtained<br>
+    with <em>-v 2</em> to <em>-v 9</em>. Default is <em>-v 1</em>; <em>-v 0</em> is silent.
   </section>
 
 <!-- ****************************** -->
@@ -1118,14 +1118,15 @@ Checking code
     <h2>Ruby+Swagger API tests</h2>
     <ul class="dothis"><legend>I swagger I</legend>
       <li>cd BrainPortal</li>
-      <li>rake db:seed:test:api</li>
+      <li>RAILS_ENV=test rake db:seed:test:api</li>
       <li>rails server puma -p 3000 -e test</li>
-      <li>rake cbrain:test:api:client badnormpatch</li>
-      <li>rake db:seed:test:api # must re-seed</li>
-      <li>rake cbrain:test:api:client</li>
+      <li>RAILS_ENV=test rake cbrain:test:api:client badnormpatch</li>
+      <li>RAILS_ENV=test rake db:seed:test:api # must re-seed</li>
+      <li>RAILS_ENV=test rake cbrain:test:api:client</li>
     </ul>
     <p>
-    Note: verbosity and debug traces can be obtained with <em>-v2</em>.. <em>-v9</em>.
+    Note: verbosity and debug traces can be obtained<br>
+    with <em>-v 2</em> to <em>-v 9</em>. Default is <em>-v 1</em>; <em>-v 0</em> is silent.
   </section>
 
 </section>
